@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>China's export reach, 2024</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--bg:#F7F6F2;--ink:#1A1A1A;--china:#B23A2E;--dest:#2A4D69;--sub:#555;--src:#777;--grid:#D8D4CC;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);
+  font-family:Inter,"Source Sans 3",system-ui,Arial,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 24px 22px;}
+h1{font-family:"Source Serif 4",Georgia,serif;font-weight:700;font-size:27px;margin:0 0 3px;letter-spacing:-.2px;}
+.subtitle{color:var(--sub);font-size:14.5px;margin:0 0 12px;max-width:880px;line-height:1.45;}
+#map{width:100%;height:560px;background:var(--bg);border:1px solid var(--grid);border-radius:6px;}
+.leaflet-container{background:var(--bg);font-family:inherit;}
+.source{color:var(--src);font-size:12px;margin:9px 0 0;}
+.legend{background:rgba(247,246,242,.92);border:1px solid var(--grid);border-radius:5px;
+  padding:9px 12px;font-size:12px;color:var(--ink);line-height:1.5;}
+.legend b{font-family:"Source Serif 4",Georgia,serif;font-size:12.5px;}
+.legend .row{display:flex;align-items:center;gap:8px;margin-top:4px;}
+.legend .bar{background:var(--dest);border-radius:2px;}
+.flowtip{font-size:13px;}
+.flowtip b{font-family:"Source Serif 4",Georgia,serif;}
+.flowtip .v{color:var(--dest);font-weight:600;}
+.dlabel{font-size:11.5px;font-weight:600;color:var(--ink);text-shadow:0 0 3px #F7F6F2,0 0 3px #F7F6F2,0 0 3px #F7F6F2;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>China&rsquo;s export reach, 2024</h1>
+  <p class="subtitle">Goods exports from China to its 15 largest destination markets, in US$ billion. Line width is proportional to export value; each line runs from China (red) to the destination (blue). These 15 markets take 62% of China&rsquo;s US$3.58 trillion in goods exports.</p>
+  <div id="map"></div>
+  <p class="source">Source: UN Comtrade, China goods exports by partner, 2024. Hong Kong includes large re-export volumes. Map tiles: CARTO / OpenStreetMap.</p>
+</div>
+<script>
+/* ---- data: China's top-15 export destinations, 2024 (US$), with map coordinates ---- */
+const ORIGIN={name:"China",lat:34.5,lon:104.0};
+const TOTAL=3.57654e12;
+const DEST=[
+ {name:"United States",lat:39.8,lon:-98.6,v:525649000000},
+ {name:"Hong Kong",lat:22.3,lon:114.2,v:290872000000},
+ {name:"Vietnam",lat:16.2,lon:106.5,v:161851000000},
+ {name:"Japan",lat:36.5,lon:138.0,v:152008000000},
+ {name:"South Korea",lat:36.5,lon:127.9,v:146229000000},
+ {name:"India",lat:22.5,lon:79.0,v:120463000000},
+ {name:"Russia",lat:55.5,lon:49.0,v:115276000000},
+ {name:"Germany",lat:51.1,lon:10.4,v:107059000000},
+ {name:"Malaysia",lat:4.2,lon:102.0,v:101459000000},
+ {name:"Netherlands",lat:52.2,lon:5.5,v:91201844814},
+ {name:"Mexico",lat:23.6,lon:-102.5,v:90229344099},
+ {name:"Thailand",lat:15.5,lon:101.0,v:86026851411},
+ {name:"Singapore",lat:1.35,lon:103.8,v:79099846812},
+ {name:"United Kingdom",lat:53.5,lon:-2.0,v:78900607063},
+ {name:"Indonesia",lat:-2.0,lon:118.0,v:76669369626}
+];
+const LABELLED=new Set(["United States","Hong Kong","Vietnam","Japan","Germany","Russia"]);
+
+const map=L.map('map',{zoomControl:true,attributionControl:true,scrollWheelZoom:false,
+  worldCopyJump:false,minZoom:2,maxZoom:5}).fitBounds([[-14,-112],[60,150]]);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png',{
+  attribution:'&copy; OpenStreetMap, &copy; CARTO',subdomains:'abcd',maxZoom:6}).addTo(map);
+
+/* ---- helpers ---- */
+function lerp(a,b,t){return a+(b-a)*t;}
+function hexToRgb(h){const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];}
+const C_CHINA=hexToRgb("#B23A2E"),C_DEST=hexToRgb("#2A4D69");
+function colorAt(t){return"rgb("+Math.round(lerp(C_CHINA[0],C_DEST[0],t))+","+
+  Math.round(lerp(C_CHINA[1],C_DEST[1],t))+","+Math.round(lerp(C_CHINA[2],C_DEST[2],t))+")";}
+function fmtBn(v){return "US$ "+(v/1e9).toFixed(1)+" bn";}
+function fmtPct(v){return (v/TOTAL*100).toFixed(1)+"% of China&rsquo;s exports";}
+
+/* quadratic-bezier arc in lat/lon, bowed perpendicular to the route (long way for trans-hemisphere) */
+function bezierPoints(o,d,segs){
+  const x1=o.lon,y1=o.lat,x2=d.lon,y2=d.lat;
+  const dx=x2-x1,dy=y2-y1,dist=Math.hypot(dx,dy);
+  const curve=0.18; // bow strength
+  // perpendicular to travel direction (left side), scaled by distance
+  const px=-dy/ (dist||1), py=dx/(dist||1);
+  const cx=(x1+x2)/2 + px*dist*curve, cy=(y1+y2)/2 + py*dist*curve;
+  const pts=[];
+  for(let i=0;i<=segs;i++){const t=i/segs;
+    const mt=1-t;
+    const x=mt*mt*x1+2*mt*t*cx+t*t*x2;
+    const y=mt*mt*y1+2*mt*t*cy+t*t*y2;
+    pts.push([y,x]);
+  }
+  return pts;
+}
+
+const maxV=Math.max(...DEST.map(d=>d.v));
+function widthFor(v){return 1.6+ (v/maxV)*13;}   // px
+function radiusFor(v){return 3+Math.sqrt(v/maxV)*9;}
+
+/* ---- draw arcs (China -> destination), gradient red->blue, width by value ---- */
+DEST.slice().sort((a,b)=>a.v-b.v).forEach(d=>{           // thin on top of thick
+  const pts=bezierPoints(ORIGIN,d,28);
+  const w=widthFor(d.v);
+  for(let i=0;i<pts.length-1;i++){
+    const t=i/(pts.length-1);
+    L.polyline([pts[i],pts[i+1]],{color:colorAt(t),weight:w,opacity:0.85,
+      lineCap:"round",interactive:false}).addTo(map);
+  }
+});
+
+/* ---- destination markers + tooltips ---- */
+DEST.forEach(d=>{
+  L.circleMarker([d.lat,d.lon],{radius:radiusFor(d.v),color:"#F7F6F2",weight:1.2,
+    fillColor:"#2A4D69",fillOpacity:0.95})
+    .bindTooltip('<div class="flowtip"><b>China &rarr; '+d.name+'</b><br>'+
+      '<span class="v">'+fmtBn(d.v)+'</span><br>'+fmtPct(d.v)+'</div>',
+      {direction:"top",offset:[0,-4],className:"flowtip-wrap"})
+    .addTo(map);
+  if(LABELLED.has(d.name)){
+    L.marker([d.lat,d.lon],{interactive:false,icon:L.divIcon({className:"",
+      html:'<div class="dlabel">'+d.name+'</div>',iconSize:[100,16],iconAnchor:[-6,8]})}).addTo(map);
+  }
+});
+
+/* ---- China origin marker ---- */
+L.circleMarker([ORIGIN.lat,ORIGIN.lon],{radius:7,color:"#F7F6F2",weight:1.5,
+  fillColor:"#B23A2E",fillOpacity:1})
+  .bindTooltip('<div class="flowtip"><b>China</b><br>Origin &middot; US$ 3.58 trillion total exports</div>',{direction:"top"})
+  .addTo(map);
+L.marker([ORIGIN.lat,ORIGIN.lon],{interactive:false,icon:L.divIcon({className:"",
+  html:'<div class="dlabel" style="color:#B23A2E">China</div>',iconSize:[60,16],iconAnchor:[-8,8]})}).addTo(map);
+
+/* ---- width legend ---- */
+const legend=L.control({position:"bottomleft"});
+legend.onAdd=function(){
+  const div=L.DomUtil.create("div","legend");
+  function row(v,label){return '<div class="row"><span class="bar" style="width:34px;height:'+
+    widthFor(v).toFixed(1)+'px"></span><span>'+label+'</span></div>';}
+  div.innerHTML='<b>Export value</b>'+row(525649000000,"US$ 525 bn (USA)")+
+    row(150000000000,"US$ 150 bn")+row(80000000000,"US$ 80 bn");
+  return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>
