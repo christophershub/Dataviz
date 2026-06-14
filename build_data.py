@@ -228,14 +228,20 @@ with open("data/abatement_options.csv", "w", newline="", encoding="utf-8") as f:
 # 4) TIPPING POINTS  (Armstrong McKay et al. 2022, Science 377, eabn7950)
 # ----------------------------------------------------------------------------
 tip_rows = [
- ["Greenland Ice Sheet collapse",0.8,1.5,3.0,"~7 m sea-level rise over millennia","High","Armstrong McKay et al. 2022, Science"],
- ["West Antarctic Ice Sheet collapse",1.0,1.5,3.0,"~5 m sea-level rise over millennia","High","Armstrong McKay et al. 2022, Science"],
- ["Warm-water coral reef die-off",1.0,1.5,2.0,"Near-total loss of low-latitude reefs","High","Armstrong McKay et al. 2022, Science"],
- ["Boreal permafrost abrupt thaw",1.0,1.5,2.3,"Localized abrupt thaw and extra carbon release","Medium","Armstrong McKay et al. 2022, Science"],
- ["Labrador-Irminger Sea convection collapse",1.1,1.8,3.8,"Regional cooling; European weather extremes","Medium","Armstrong McKay et al. 2022, Science"],
- ["Atlantic circulation (AMOC) collapse",1.4,4.0,8.0,"Major shifts in regional climate and monsoons","Medium","Armstrong McKay et al. 2022, Science"],
+ ["Greenland Ice Sheet collapse",0.8,1.5,3.0,"~7 m sea-level rise over millennia","High","Armstrong McKay et al. 2022, Science",
+  "Both countries' coasts lie far from Greenland, so its meltwater raises local sea level by close to, or above, the global average. Low-lying hubs such as Shanghai, the Pearl River Delta, Florida and the US Gulf Coast are among the most exposed."],
+ ["West Antarctic Ice Sheet collapse",1.0,1.5,3.0,"~5 m sea-level rise over millennia","High","Armstrong McKay et al. 2022, Science",
+  "Gravitational 'fingerprint' effects mean Antarctic ice loss raises Northern-Hemisphere sea level above the global mean, disproportionately affecting Chinese and US coastlines, including the densely populated US East Coast and China's eastern seaboard."],
+ ["Warm-water coral reef die-off",1.0,1.5,2.0,"Near-total loss of low-latitude reefs","High","Armstrong McKay et al. 2022, Science",
+  "China's reefs in the South China Sea (around Hainan and the Paracel/Spratly islands) and US reefs off Florida, Hawai'i and the Pacific territories would face near-total loss, hitting fisheries, tourism and natural coastal protection."],
+ ["Boreal permafrost abrupt thaw",1.0,1.5,2.3,"Localized abrupt thaw and extra carbon release","Medium","Armstrong McKay et al. 2022, Science",
+  "The US has extensive permafrost in Alaska, and China on the Qinghai-Tibet Plateau and in the north-east. Thaw damages infrastructure (roads, the Qinghai-Tibet railway, Alaskan pipelines and buildings) and releases extra CO2 and methane."],
+ ["Labrador-Irminger Sea convection collapse",1.1,1.8,3.8,"Regional cooling; European weather extremes","Medium","Armstrong McKay et al. 2022, Science",
+  "This North Atlantic convection collapse would cool the north-east US and bring harsher winters to eastern North America and Europe; effects on China are weaker and more indirect, transmitted through the global circulation."],
+ ["Atlantic circulation (AMOC) collapse",1.4,4.0,8.0,"Major shifts in regional climate and monsoons","Medium","Armstrong McKay et al. 2022, Science",
+  "An AMOC collapse would add extra sea-level rise along the US East Coast and disrupt rainfall across the Americas, while weakening and shifting the East Asian monsoon that much of China's agriculture depends on."],
 ]
-tip_header = ["tipping_element","lower_warming_level","central_warming_level","upper_warming_level","consequence","confidence","source"]
+tip_header = ["tipping_element","lower_warming_level","central_warming_level","upper_warming_level","consequence","confidence","source","relevance"]
 with open("data/tipping_points.csv", "w", newline="", encoding="utf-8") as f:
     w = csv.writer(f); w.writerow(tip_header); w.writerows(tip_rows)
 

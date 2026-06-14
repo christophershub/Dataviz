@@ -150,30 +150,6 @@ function updateClimateKeyNumbers(){
   });
 }
 
-/* ============ tipping strip ============ */
-function updateTipping(){
-  const names=TIP.map(r=>r.tipping_element);
-  const lows=TIP.map(r=>+r.lower_warming_level);
-  const ups=TIP.map(r=>+r.upper_warming_level);
-  const cen=TIP.map(r=>+r.central_warming_level);
-  const bars={y:names,x:ups.map((u,i)=>u-lows[i]),base:lows,orientation:"h",type:"bar",
-    marker:{color:hexA(MUTED,0.55),line:{color:MUTED,width:1}},
-    customdata:TIP.map(r=>[r.consequence,r.confidence,r.lower_warming_level+"–"+r.upper_warming_level+" °C",r.source]),
-    hovertemplate:"<b>%{y}</b><br>Range: %{customdata[2]} (central %{text} °C)<br>%{customdata[0]}<br>Confidence: %{customdata[1]}<br><i>%{customdata[3]}</i><extra></extra>",
-    text:cen,textposition:"none",showlegend:false};
-  const dots={y:names,x:cen,mode:"markers",type:"scatter",marker:{color:INK,size:8,symbol:"line-ns-open"},
-    hoverinfo:"skip",showlegend:false};
-  const layout=baseLayout();
-  layout.height=230;layout.margin={l:230,r:30,t:8,b:34};
-  layout.xaxis={range:[1,4.2],title:{text:"Global warming above pre-industrial (°C)",font:{size:11.5,family:FONT,color:SUB}},
-    tickvals:[1,1.5,2,3,4],ticktext:["1°","1.5°","2°","3°","4°"],gridcolor:GRID,zeroline:false,
-    tickfont:{family:FONT,size:11,color:INK}};
-  layout.yaxis={automargin:true,tickfont:{family:FONT,size:11.5,color:INK},autorange:"reversed"};
-  layout.shapes=[1.5,2,3,4].map(v=>({type:"line",x0:v,x1:v,y0:0,y1:1,yref:"paper",
-    line:{color:(v==1.5?"#c98":"#ccc"),width:1,dash:"dot"}}));
-  Plotly.react("tip-chart",[bars,dots],layout,{displayModeBar:false,responsive:true});
-}
-
 /* ============ interactive tipping-point explainer ============ */
 let tipIndex=0;
 function buildTipSelect(){
@@ -209,6 +185,7 @@ function updateTipDetail(){
   document.getElementById("tip-consequence").innerHTML="<b>"+rk.lead+"</b> "+r.consequence+
     " (central estimate "+ce.toFixed(1)+" °C; estimated range "+lo.toFixed(1)+"–"+hi.toFixed(1)+" °C).";
   document.getElementById("tip-source").textContent=r.source+" · confidence: "+r.confidence;
+  const rel=document.getElementById("tip-relevance-text");if(rel)rel.textContent=r.relevance||"";
   renderTipRuler(r,lo,ce,hi,w,rk.color);
 }
 function renderTipRuler(r,lo,ce,hi,w,color){
@@ -340,7 +317,7 @@ function setView(v){
   // indicator + time controls only apply to climate view
   document.getElementById("indicator-group").style.opacity=(v==="climate")?"1":"0.4";
   document.getElementById("time-group").style.opacity=(v==="climate")?"1":"0.4";
-  if(v==="climate"){updateClimateChart();updateTipping();}
+  if(v==="climate"){updateClimateChart();updateTipDetail();}
   else{updateTransitionChart();updateCards();}
 }
 
@@ -369,7 +346,7 @@ function onCountry(country,el){
   state.countries[country]=el.checked;refreshAll();
 }
 function refreshAll(){
-  if(state.view==="climate"){updateClimateChart();updateTipping();}
+  if(state.view==="climate"){updateClimateChart();updateTipDetail();}
   else{updateTransitionChart();updateCards();}
 }
 function resetView(){
@@ -399,10 +376,4 @@ function resetView(){
   buildTipSelect();
   wire();
   resetView();   // force deterministic default state (ignore any browser-restored control values)
-  // clicking a bar in the overview strip selects that element in the explainer
-  const tc=document.getElementById("tip-chart");
-  if(tc&&tc.on){tc.on("plotly_click",ev=>{
-    const nm=ev.points[0].y;const i=TIP.findIndex(r=>r.tipping_element===nm);
-    if(i>=0){tipIndex=i;document.getElementById("tip-select").value=i;updateTipDetail();}
-  });}
 })();

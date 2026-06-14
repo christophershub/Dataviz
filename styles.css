@@ -58,7 +58,11 @@ h1{font-family:"Source Serif 4",Georgia,"Times New Roman",serif;font-weight:700;
 .knrange{color:var(--src);font-size:11.5px;}
 
 /* ---- interactive tipping-point explainer ---- */
-.tip-detail-card{margin-top:14px;background:#fff;border:1px solid var(--grid);border-radius:6px;padding:14px 16px;}
+.tip-detail-card{margin-top:18px;background:#fff;border:1px solid var(--grid);border-radius:6px;padding:14px 16px;}
+.tip-detail-card h3{font-family:"Source Serif 4",Georgia,serif;font-size:16px;margin:0 0 4px;}
+.tip-relevance{margin-top:16px;border-top:1px solid var(--grid);padding-top:12px;}
+.tip-relevance h4{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--src);font-weight:600;margin:0 0 5px;}
+.tip-relevance p{font-size:13px;color:var(--ink);margin:0;line-height:1.45;max-width:900px;}
 .tip-controls{display:flex;flex-wrap:wrap;gap:16px 26px;align-items:flex-end;margin-bottom:12px;}
 .tip-field{display:flex;flex-direction:column;gap:5px;}
 .tip-field select{font-family:inherit;font-size:13.5px;padding:6px 10px;border:1px solid var(--grid);
