@@ -143,8 +143,10 @@ phys_rows = []
 for line in phys_raw.strip().splitlines():
     c = line.split(",")
     country = CC_MAP[c[0]]
-    year = int(c[1]); scen = c[2]
-    if scen != "historical":
+    year = int(c[1]); scen = c[2]; indicator = c[3]
+    # Only temperature/precipitation are 20-year climatology windows -> plot at window centre.
+    # hot_days are annual timeseries points and keep their true year (so the series starts at 2020).
+    if scen != "historical" and indicator in ("temp_anomaly", "precip_change"):
         year = PROJ_YEAR_MAP[year]
     src = SRC_MAP.get(c[9], c[9])
     phys_rows.append([country, year, scen, c[3], c[4], c[5], c[6], c[7], c[8], src])

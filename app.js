@@ -42,11 +42,17 @@ const INDIC={
     fmt:v=>(v>0?"+":"")+v.toFixed(1)+" %",
     finding:"Precipitation responses are smaller, more mixed and more uncertain than temperature changes."},
   hot_days:{title:"Extremely hot days (> 35 °C)",ytitle:"Days above 35 °C per year",unit:"days",
-    desc:"Annual count of days with maximum temperature above 35 °C (national average).",
+    desc:"Annual count of days above 35 °C (national average). Projected values only; no consistent observed record is available.",
     fmt:v=>Math.round(v)+" days",
     finding:"Extreme-heat exposure rises sharply under higher-emissions pathways."}
 };
 const HISTLAST=2020;
+// Abatement levers typically needed under each transition scenario (more ambition -> more levers).
+const SUGGEST={
+  "Current Policies":["Methane abatement","Building & industrial efficiency"],
+  "Delayed Transition":["Renewable electricity expansion","Coal phase-down","Electricity grid & storage","Transport electrification"],
+  "Net Zero 2050":["Renewable electricity expansion","Coal phase-down","Electricity grid & storage","Transport electrification","Building & industrial efficiency","Methane abatement"]
+};
 
 /* ============ state ============ */
 const DEFAULTS={countries:{China:true,"United States":true},indicator:"temp_anomaly",
@@ -121,7 +127,7 @@ function updateClimateChart(){
     line:{color:"#bbb",width:1,dash:"dot"}}];
   layout.title={text:"<b>"+ind.title+"</b><br><span style='font-size:12px;color:#555'>"+ind.desc+"  China (red) vs United States (blue)</span>",
     font:{family:'Source Serif 4, Georgia, serif',size:17,color:INK},x:0.01,xanchor:"left",y:0.97};
-  layout.margin.t=64;
+  layout.margin.t=64;layout.margin.r=88;
   Plotly.react("climate-chart",traces,layout,{displayModeBar:false,responsive:true});
   // side panel
   document.getElementById("ind-title").textContent=ind.title;
@@ -159,9 +165,9 @@ function buildTipSelect(){
 }
 function tipRisk(w,lo,ce,hi){
   if(w<lo)  return {pct:0,  color:"#2A4D69",status:"Below estimated threshold range",lead:"If this threshold is crossed:"};
-  if(w>=hi) return {pct:100,color:"#B23A2E",status:"Above estimated range — crossing likely",lead:"Likely impact:"};
+  if(w>=hi) return {pct:100,color:"#B23A2E",status:"Above estimated range, crossing likely",lead:"Likely impact:"};
   const pct=Math.round((w-lo)/(hi-lo)*100);
-  if(w<ce)  return {pct,color:"#E69F00",status:"Entering threshold range — risk rising",lead:"Potential impact:"};
+  if(w<ce)  return {pct,color:"#E69F00",status:"Entering threshold range, risk rising",lead:"Potential impact:"};
   return {pct,color:"#C0552E",status:"Within likely threshold range",lead:"Potential impact:"};
 }
 function setTipWarming(v){
@@ -240,9 +246,9 @@ function updateTransitionChart(){
   layout.xaxis.range=[2020,2052];layout.xaxis.title={text:"Year",font:{size:12,family:FONT,color:SUB}};
   layout.yaxis.title={text:"Annual emissions (MtCO₂e)",font:{size:12.5,family:FONT,color:SUB}};
   layout.yaxis.rangemode="tozero";
-  layout.title={text:"<b>Emissions pathways — "+selName+"</b><br><span style='font-size:12px;color:#555'>Bold line = selected scenario; faint lines = other scenarios. China (red) vs United States (blue)</span>",
+  layout.title={text:"<b>Emissions pathways: "+selName+"</b><br><span style='font-size:12px;color:#555'>Bold line = selected scenario; faint lines = other scenarios. China (red) vs United States (blue)</span>",
     font:{family:'Source Serif 4, Georgia, serif',size:17,color:INK},x:0.01,xanchor:"left",y:0.97};
-  layout.margin.t=64;
+  layout.margin.t=64;layout.margin.r=88;
   Plotly.react("transition-chart",traces,layout,{displayModeBar:false,responsive:true});
 }
 
@@ -277,6 +283,45 @@ function updateCards(){
   document.getElementById("card-cum").textContent=f(cum);
   document.getElementById("card-rem").textContent=f(rem);
   updateTransDetail();
+  updateAbateScenario();
+}
+
+/* connect the selected scenario to the abatement package: how big is the cut this
+   pathway implies (vs a current-policies path), and how much does the package cover? */
+function updateAbateScenario(){
+  const host=document.getElementById("abate-scenario");if(!host)return;
+  const cs=selectedCountries();const selName=SCEN[state.scenario].trans;
+  let cp=0,target=0,ann=0;
+  cs.forEach(c=>{
+    const cpD=transSeries(c,"Current Policies"),tgD=transSeries(c,selName);
+    const cpL=cpD.find(p=>p.year===2050)||cpD[cpD.length-1];
+    const tgL=tgD.find(p=>p.year===2050)||tgD[tgD.length-1];
+    if(cpL)cp+=cpL.e;if(tgL)target+=tgL.e;
+  });
+  const gap=Math.max(0,cp-target);
+  ABATE.forEach(r=>{if(abateSel.has(r.option)&&cs.includes(r.country))ann+=+r.estimated_annual_abatement_mtco2e;});
+  const pct=gap>0?Math.min(100,Math.round(ann/gap*100)):0;
+  const f=n=>Math.round(n).toLocaleString();
+  let intro;
+  if(gap<=0){
+    intro="<b>Current Policies</b> implies little abatement beyond today's path, so few measures are required. More ambitious scenarios (Intermediate, Low) call for progressively more of the levers below.";
+  }else{
+    intro="Reaching <b>"+selName+"</b> by 2050 means cutting about <b>"+f(gap)+"</b> MtCO₂e per year versus a Current-Policies path (selected countries). Your package delivers <b>"+f(ann)+"</b> MtCO₂e per year, about <b>"+pct+"%</b> of that cut.";
+  }
+  const barColor=pct>=100?"#2A4D69":(pct>=50?"#E69F00":"#B23A2E");
+  host.innerHTML=
+    '<p class="abate-scenario-text">'+intro+'</p>'+
+    (gap>0?'<div class="abate-bar"><div class="abate-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div>':'')+
+    '<button type="button" class="btn abate-suggest" id="abate-suggest">Apply the options typical of '+selName+'</button>';
+  document.getElementById("abate-suggest").addEventListener("click",applySuggested);
+}
+function applySuggested(){
+  const set=SUGGEST[SCEN[state.scenario].trans]||[];
+  abateSel=new Set(set);
+  document.querySelectorAll("#opts input").forEach(cb=>{
+    const on=set.includes(cb.dataset.opt);cb.checked=on;cb.closest(".opt-row").classList.toggle("sel",on);
+  });
+  updateCards();
 }
 
 /* live per-country 2050 emissions & carbon price under the selected scenario */

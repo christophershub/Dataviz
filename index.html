@@ -69,13 +69,13 @@
         <div class="keynums" id="keynums"></div>
         <div class="kv"><span>Scenario</span><b id="p-scen"></b></div>
         <div class="kv"><span>Baseline</span><b>1981–2010</b></div>
-        <div class="kv"><span>History → projection</span><b>2020</b></div>
+        <div class="kv"><span>History to projection</span><b>2020</b></div>
         <p class="finding" id="ind-finding"></p>
       </div>
     </div>
     <div class="tip-detail-card">
       <h3>Climate tipping points and the risk of crossing them</h3>
-      <p class="note">A climate <b>tipping point</b> is a level of global warming beyond which part of the Earth system shifts into a new state that becomes self-sustaining and, on human timescales, effectively irreversible — for example the long-term collapse of an ice sheet or of an ocean circulation. The warming thresholds below are best estimates with wide uncertainty; risk rises as warming approaches and passes them. Thresholds from Armstrong McKay et al. 2022, Science; regional relevance based on IPCC AR6 and sea-level "fingerprint" research. <b>Select an element and drag the warming slider to explore.</b></p>
+      <p class="note">A climate <b>tipping point</b> is a level of global warming beyond which part of the Earth system shifts into a new state that becomes self-sustaining and, on human timescales, effectively irreversible, such as the long-term collapse of an ice sheet or of an ocean circulation. The warming thresholds below are best estimates with wide uncertainty; risk rises as warming approaches and passes them. Thresholds from Armstrong McKay et al. 2022, Science; regional relevance based on IPCC AR6 and sea-level "fingerprint" research. <b>Select an element and drag the warming slider to explore.</b></p>
       <div class="tip-controls">
         <label class="tip-field">
           <span class="clabel">Tipping element</span>
@@ -91,7 +91,7 @@
         <div class="tip-status-col">
           <div id="tip-status" class="tip-status">—</div>
           <div class="tip-meter"><div id="tip-meter-fill" class="tip-meter-fill"></div></div>
-          <div class="tip-meter-cap">Illustrative risk that the threshold is exceeded — rises with warming across the estimated range. This is a qualitative risk indicator, not a physical quantity.</div>
+          <div class="tip-meter-cap">Illustrative risk that the threshold is exceeded. It rises with warming across the estimated range, and is a qualitative risk indicator, not a physical quantity.</div>
           <p id="tip-consequence" class="tip-consequence"></p>
           <p id="tip-source" class="src"></p>
         </div>
@@ -120,14 +120,15 @@
     </div>
     <div class="abate">
       <h3>Build an abatement package</h3>
-      <p class="note">Tick options to add their investment and abatement to the summary. Option effects are shown as an illustrative sum — interactions, overlaps and economy-wide feedback effects are not modelled, and these choices do not recalculate the physical-climate chart.</p>
+      <p class="note">Tick options to add their investment and abatement to the summary. Option effects are shown as an illustrative sum: interactions, overlaps and economy-wide feedback effects are not modelled, and these choices do not recalculate the physical-climate chart.</p>
+      <div class="abate-scenario" id="abate-scenario"></div>
       <div class="opts" id="opts"></div>
     </div>
   </section>
 
   <footer>
     <h4>Methodology &amp; sources</h4>
-    <p><b>Scenario frameworks differ.</b> Physical-climate pathways use CMIP6 SSP scenarios (SSP1-2.6 / SSP2-4.5 / SSP5-8.5); transition pathways use NGFS narratives (Net Zero 2050 / Delayed Transition / Current Policies). The Low/Intermediate/High labels align them conceptually only — the names are <i>not</i> interchangeable across the two modelling frameworks.</p>
+    <p><b>Scenario frameworks differ.</b> Physical-climate pathways use CMIP6 SSP scenarios (SSP1-2.6 / SSP2-4.5 / SSP5-8.5); transition pathways use NGFS narratives (Net Zero 2050 / Delayed Transition / Current Policies). The Low/Intermediate/High labels align them conceptually only; the names are <i>not</i> interchangeable across the two modelling frameworks.</p>
     <p><b>Definitions.</b> Temperature anomaly and precipitation change are relative to the 1981–2010 baseline. "Extremely hot days" are days above 35 °C (national average). Uncertainty ribbons show the CMIP6 ensemble 10th–90th-percentile bounds. Physical outcomes are <i>not</i> recalculated from national investment choices, which would require an integrated climate model. Projection points are plotted at 20-year-window centres (2030, 2050, 2070, 2090).</p>
     <p><b>Sources.</b> Physical climate: World Bank Climate Change Knowledge Portal (CMIP6 multi-model ensemble; ERA5 for observed history). Transition pathways: NGFS Phase V scenarios; base-year emissions and investment from IEA and US EIA. Abatement options: IEA Net Zero Roadmap and China carbon-neutrality roadmap, IPCC AR6 WGIII, Rhodium Group, IEA Global Methane Tracker. Tipping points: Armstrong McKay, D.I. et al. (2022), <i>Science</i> 377, eabn7950. Transition-pathway trajectories between published anchor points are interpolated consistent with NGFS scenario logic.</p>
     <p>Built with Plotly.js. Data files: <code>data/physical_climate.csv</code>, <code>data/transition_pathways.csv</code>, <code>data/abatement_options.csv</code>, <code>data/tipping_points.csv</code>. Last updated: 2026-06-14.</p>
