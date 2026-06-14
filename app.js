@@ -91,7 +91,7 @@ function physSeries(country,indicator,scenKey){
 
 /* ============ climate chart ============ */
 function updateClimateChart(){
-  const ind=INDIC[state.indicator];const traces=[];const ann=[];
+  const ind=INDIC[state.indicator];const traces=[];const ann=[];const endpts=[];
   selectedCountries().forEach(country=>{
     const {hist,proj}=physSeries(country,state.indicator,state.scenario);
     const col=COL[country];
@@ -114,9 +114,22 @@ function updateClimateChart(){
       hovertemplate:"<b>%{customdata[0]}</b> · %{x}<br>%{customdata[1]}<br>"+ind.title+": %{customdata[2]}<br>Range: %{customdata[3]}<br>Baseline: %{customdata[4]}<extra></extra>"});
     // direct end label
     const last=proj[proj.length-1];
-    if(last&&last.year<=state.to){ann.push({x:last.year,y:last.v,xanchor:"left",yanchor:"middle",
-      text:" "+country.replace("United States","U.S."),showarrow:false,font:{color:col,size:12,family:FONT}});}
+    if(last&&last.year<=state.to){const a={x:last.year,y:last.v,xanchor:"left",yanchor:"middle",
+      text:" "+country.replace("United States","U.S."),showarrow:false,font:{color:col,size:12,family:FONT}};
+      ann.push(a);endpts.push({y:last.v,a:a});}
   });
+  // separate end labels vertically if the two countries end too close to read
+  if(endpts.length===2){
+    let vals=[];
+    selectedCountries().forEach(c=>{const s=physSeries(c,state.indicator,state.scenario);
+      s.hist.concat(s.proj).forEach(d=>{if(d.year>=state.from&&d.year<=state.to&&!isNaN(d.v))vals.push(d.v);});});
+    const span=(Math.max.apply(null,vals)-Math.min.apply(null,vals))||1;
+    if(Math.abs(endpts[0].y-endpts[1].y)/span<0.1){
+      const hi=endpts[0].y>=endpts[1].y?endpts[0]:endpts[1];
+      const lo=hi===endpts[0]?endpts[1]:endpts[0];
+      hi.a.yshift=10;lo.a.yshift=-10;
+    }
+  }
   const layout=baseLayout();
   layout.yaxis.title={text:ind.ytitle,font:{size:12.5,family:FONT,color:SUB}};
   layout.xaxis.range=[state.from,state.to];
