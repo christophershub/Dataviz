@@ -75,8 +75,32 @@
     </div>
     <div class="strip-card">
       <h3>Climate tipping-point risk increases with global warming</h3>
-      <p class="note">Estimated warming thresholds for selected tipping elements (bar = range, marker = central estimate). Thresholds are uncertain; risk generally rises with warming. Ranges from Armstrong McKay et al. 2022, Science.</p>
+      <p class="note">Estimated warming thresholds for selected tipping elements (bar = range, marker = central estimate). Thresholds are uncertain; risk generally rises with warming. <b>Click a bar</b> — or use the selector below — to explore one element. Ranges from Armstrong McKay et al. 2022, Science.</p>
       <div id="tip-chart" class="tip-chart"></div>
+    </div>
+
+    <div class="tip-detail-card">
+      <div class="tip-controls">
+        <label class="tip-field">
+          <span class="clabel">Tipping element</span>
+          <select id="tip-select"></select>
+        </label>
+        <label class="tip-field">
+          <span class="clabel">Global warming level <output id="tip-warming-val">1.5 °C</output></span>
+          <input type="range" id="tip-warming" min="1" max="4.5" step="0.1" value="1.5" aria-label="Global warming level in degrees Celsius"/>
+        </label>
+        <span class="tip-scennote" id="tip-scennote"></span>
+      </div>
+      <div class="tip-detail-body">
+        <div class="tip-status-col">
+          <div id="tip-status" class="tip-status">—</div>
+          <div class="tip-meter"><div id="tip-meter-fill" class="tip-meter-fill"></div></div>
+          <div class="tip-meter-cap">Illustrative risk that the threshold is exceeded — rises with warming across the estimated range. This is a qualitative risk indicator, not a physical quantity.</div>
+          <p id="tip-consequence" class="tip-consequence"></p>
+          <p id="tip-source" class="src"></p>
+        </div>
+        <div class="tip-ruler-col"><div id="tip-ruler" class="tip-ruler"></div></div>
+      </div>
     </div>
   </section>
 

@@ -27,10 +27,11 @@ const SYM={China:"circle","United States":"diamond"};
 const GRID="#D8D4CC",INK="#1A1A1A",SUB="#555555",MUTED="#B0ABA2",BG="#F7F6F2";
 const FONT='Inter, "Source Sans 3", system-ui, Arial, sans-serif';
 const SCEN={
-  low:{phys:"SSP1-2.6",trans:"Net Zero 2050",label:"Low"},
-  intermediate:{phys:"SSP2-4.5",trans:"Delayed Transition",label:"Intermediate"},
-  high:{phys:"SSP5-8.5",trans:"Current Policies",label:"High"}
+  low:{phys:"SSP1-2.6",trans:"Net Zero 2050",label:"Low",gw:1.8},
+  intermediate:{phys:"SSP2-4.5",trans:"Delayed Transition",label:"Intermediate",gw:2.7},
+  high:{phys:"SSP5-8.5",trans:"Current Policies",label:"High",gw:4.4}
 };
+// gw = best-estimate global mean warming by 2081-2100 vs 1850-1900 (IPCC AR6 SPM)
 const INDIC={
   temp_anomaly:{title:"Mean temperature anomaly",ytitle:"Temperature anomaly (°C)",unit:"°C",
     desc:"Annual mean temperature relative to the 1981–2010 baseline.",
@@ -133,14 +134,18 @@ function updateClimateChart(){
 /* live per-country end-of-century readout (details on demand) */
 function updateClimateKeyNumbers(){
   const ind=INDIC[state.indicator];const host=document.getElementById("keynums");host.innerHTML="";
+  const ssp=SCEN[state.scenario].phys;
+  host.innerHTML='<div class="kn-head">End-of-century projection &middot; '+ssp+'</div>';
   selectedCountries().forEach(country=>{
     const {proj}=physSeries(country,state.indicator,state.scenario);
     const last=proj[proj.length-1];if(!last)return;
     const row=document.createElement("div");row.className="knrow";
     row.innerHTML='<span class="kndot" style="background:'+COL[country]+'"></span>'+
-      '<span class="knlab">'+country.replace("United States","U.S.")+' &middot; '+last.year+'</span>'+
-      '<span class="knval">'+ind.fmt(last.v)+'</span>'+
-      '<span class="knrange">'+ind.fmt(last.lo)+' – '+ind.fmt(last.hi)+'</span>';
+      '<div class="kncol">'+
+        '<div class="knlab">'+country.replace("United States","U.S.")+' in '+last.year+'</div>'+
+        '<div class="knval">'+ind.fmt(last.v)+'</div>'+
+        '<div class="knrange">likely range '+ind.fmt(last.lo)+' to '+ind.fmt(last.hi)+'</div>'+
+      '</div>';
     host.appendChild(row);
   });
 }
@@ -167,6 +172,66 @@ function updateTipping(){
   layout.shapes=[1.5,2,3,4].map(v=>({type:"line",x0:v,x1:v,y0:0,y1:1,yref:"paper",
     line:{color:(v==1.5?"#c98":"#ccc"),width:1,dash:"dot"}}));
   Plotly.react("tip-chart",[bars,dots],layout,{displayModeBar:false,responsive:true});
+}
+
+/* ============ interactive tipping-point explainer ============ */
+let tipIndex=0;
+function buildTipSelect(){
+  const sel=document.getElementById("tip-select");sel.innerHTML="";
+  TIP.forEach((r,i)=>{const o=document.createElement("option");o.value=i;o.textContent=r.tipping_element;sel.appendChild(o);});
+  sel.value=tipIndex;
+}
+function tipRisk(w,lo,ce,hi){
+  if(w<lo)  return {pct:0,  color:"#2A4D69",status:"Below estimated threshold range",lead:"If this threshold is crossed:"};
+  if(w>=hi) return {pct:100,color:"#B23A2E",status:"Above estimated range — crossing likely",lead:"Likely impact:"};
+  const pct=Math.round((w-lo)/(hi-lo)*100);
+  if(w<ce)  return {pct,color:"#E69F00",status:"Entering threshold range — risk rising",lead:"Potential impact:"};
+  return {pct,color:"#C0552E",status:"Within likely threshold range",lead:"Potential impact:"};
+}
+function setTipWarming(v){
+  document.getElementById("tip-warming").value=v;
+  document.getElementById("tip-warming-val").textContent=(+v).toFixed(1)+" °C";
+  updateTipDetail();
+}
+function updateTipScenNote(){
+  const sc=SCEN[state.scenario];
+  document.getElementById("tip-scennote").innerHTML=
+    "The selected scenario ("+sc.phys+") reaches about <b>"+sc.gw.toFixed(1)+" °C</b> of global mean warming by 2100 (IPCC AR6). Drag to explore other levels.";
+}
+function updateTipDetail(){
+  const r=TIP[tipIndex];if(!r)return;
+  const lo=+r.lower_warming_level,ce=+r.central_warming_level,hi=+r.upper_warming_level;
+  const w=+document.getElementById("tip-warming").value;
+  const rk=tipRisk(w,lo,ce,hi);
+  const st=document.getElementById("tip-status");
+  st.textContent=rk.status+" · "+rk.pct+"%";st.style.background=rk.color;
+  const mf=document.getElementById("tip-meter-fill");mf.style.width=rk.pct+"%";mf.style.background=rk.color;
+  document.getElementById("tip-consequence").innerHTML="<b>"+rk.lead+"</b> "+r.consequence+
+    " (central estimate "+ce.toFixed(1)+" °C; estimated range "+lo.toFixed(1)+"–"+hi.toFixed(1)+" °C).";
+  document.getElementById("tip-source").textContent=r.source+" · confidence: "+r.confidence;
+  renderTipRuler(r,lo,ce,hi,w,rk.color);
+}
+function renderTipRuler(r,lo,ce,hi,w,color){
+  const band={y:["x"],x:[hi-lo],base:[lo],orientation:"h",type:"bar",width:[0.5],
+    marker:{color:hexA(MUTED,0.5),line:{color:MUTED,width:1}},
+    hovertemplate:"Estimated threshold range: "+lo.toFixed(1)+"–"+hi.toFixed(1)+" °C<extra></extra>",showlegend:false};
+  const central={y:["x"],x:[ce],type:"scatter",mode:"markers",
+    marker:{symbol:"line-ns-open",size:28,color:INK,line:{width:2}},
+    hovertemplate:"Central estimate: "+ce.toFixed(1)+" °C<extra></extra>",showlegend:false};
+  const marker={y:["x"],x:[w],type:"scatter",mode:"markers+text",
+    marker:{symbol:"diamond",size:15,color:color,line:{color:"#fff",width:1.5}},
+    text:["  "+w.toFixed(1)+" °C"],textposition:"top center",textfont:{family:FONT,size:12,color:color},
+    hovertemplate:"Selected warming: "+w.toFixed(1)+" °C<extra></extra>",showlegend:false};
+  const layout=baseLayout();
+  layout.height=150;layout.margin={l:14,r:18,t:28,b:36};layout.showlegend=false;
+  layout.title={text:"<b>"+r.tipping_element+"</b>",font:{family:'Source Serif 4, Georgia, serif',size:14,color:INK},x:0,xanchor:"left",y:0.98};
+  layout.xaxis={range:[1,4.5],tickvals:[1,1.5,2,3,4],ticktext:["1°","1.5°","2°","3°","4°"],
+    gridcolor:"rgba(0,0,0,0)",zeroline:false,showline:true,linecolor:GRID,ticks:"outside",tickcolor:GRID,
+    title:{text:"Global warming above pre-industrial (°C)",font:{size:11,family:FONT,color:SUB}},
+    tickfont:{family:FONT,size:11,color:INK}};
+  layout.yaxis={visible:false,range:[-0.6,0.7]};
+  layout.shapes=[1.5,2,3,4].map(v=>({type:"line",x0:v,x1:v,y0:0,y1:1,yref:"paper",line:{color:"#ddd",width:1,dash:"dot"}}));
+  Plotly.react("tip-ruler",[band,central,marker],layout,{displayModeBar:false,responsive:true});
 }
 
 /* ============ transition chart ============ */
@@ -241,13 +306,16 @@ function updateCards(){
 function updateTransDetail(){
   const host=document.getElementById("trans-detail");if(!host)return;host.innerHTML="";
   const selName=SCEN[state.scenario].trans;
+  host.innerHTML='<div class="kn-head">Projected 2050 outcome &middot; '+selName+'</div>';
   selectedCountries().forEach(country=>{
     const d=transSeries(country,selName);const last=d.find(p=>p.year===2050)||d[d.length-1];if(!last)return;
     const row=document.createElement("div");row.className="knrow";
     row.innerHTML='<span class="kndot" style="background:'+COL[country]+'"></span>'+
-      '<span class="knlab">'+country.replace("United States","U.S.")+' &middot; 2050 ('+selName+')</span>'+
-      '<span class="knval">'+last.e.toLocaleString()+' Mt</span>'+
-      '<span class="knrange">$'+last.cp+'/t CO&#8322;</span>';
+      '<div class="kncol">'+
+        '<div class="knlab">'+country.replace("United States","U.S.")+' in 2050</div>'+
+        '<div><span class="knval">'+last.e.toLocaleString()+'</span> <span class="knunit">MtCO&#8322;e per year (emissions)</span></div>'+
+        '<div class="knrange">carbon price $'+last.cp+' per tonne CO&#8322;</div>'+
+      '</div>';
     host.appendChild(row);
   });
 }
@@ -284,7 +352,11 @@ function wire(){
   document.querySelectorAll('input[name="indicator"]').forEach(r=>r.addEventListener("change",e=>{
     state.indicator=e.target.value;updateClimateChart();}));
   document.querySelectorAll('input[name="scenario"]').forEach(r=>r.addEventListener("change",e=>{
-    state.scenario=e.target.value;refreshAll();}));
+    state.scenario=e.target.value;refreshAll();
+    updateTipScenNote();setTipWarming(SCEN[state.scenario].gw);}));
+  document.getElementById("tip-select").addEventListener("change",e=>{tipIndex=+e.target.value;updateTipDetail();});
+  document.getElementById("tip-warming").addEventListener("input",e=>{
+    document.getElementById("tip-warming-val").textContent=(+e.target.value).toFixed(1)+" °C";updateTipDetail();});
   document.getElementById("tab-climate").addEventListener("click",()=>setView("climate"));
   document.getElementById("tab-transition").addEventListener("click",()=>setView("transition"));
   document.getElementById("reset").addEventListener("click",resetView);
@@ -307,6 +379,8 @@ function resetView(){
   document.querySelector('input[name="scenario"][value="intermediate"]').checked=true;
   document.getElementById("t-from").value=1990;document.getElementById("t-to").value=2100;
   document.querySelectorAll('#opts input').forEach(cb=>{cb.checked=false;cb.closest(".opt-row").classList.remove("sel");});
+  tipIndex=0;document.getElementById("tip-select").value=0;
+  updateTipScenNote();setTipWarming(SCEN[state.scenario].gw);
   syncTimeReadout();setView("climate");
 }
 
@@ -322,6 +396,13 @@ function resetView(){
     return;
   }
   buildOpts();
+  buildTipSelect();
   wire();
   resetView();   // force deterministic default state (ignore any browser-restored control values)
+  // clicking a bar in the overview strip selects that element in the explainer
+  const tc=document.getElementById("tip-chart");
+  if(tc&&tc.on){tc.on("plotly_click",ev=>{
+    const nm=ev.points[0].y;const i=TIP.findIndex(r=>r.tipping_element===nm);
+    if(i>=0){tipIndex=i;document.getElementById("tip-select").value=i;updateTipDetail();}
+  });}
 })();
