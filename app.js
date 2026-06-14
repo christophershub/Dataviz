@@ -127,6 +127,22 @@ function updateClimateChart(){
   document.getElementById("ind-desc").textContent=ind.desc;
   document.getElementById("ind-finding").textContent=ind.finding;
   document.getElementById("p-scen").textContent=SCEN[state.scenario].phys+" ("+SCEN[state.scenario].label+")";
+  updateClimateKeyNumbers();
+}
+
+/* live per-country end-of-century readout (details on demand) */
+function updateClimateKeyNumbers(){
+  const ind=INDIC[state.indicator];const host=document.getElementById("keynums");host.innerHTML="";
+  selectedCountries().forEach(country=>{
+    const {proj}=physSeries(country,state.indicator,state.scenario);
+    const last=proj[proj.length-1];if(!last)return;
+    const row=document.createElement("div");row.className="knrow";
+    row.innerHTML='<span class="kndot" style="background:'+COL[country]+'"></span>'+
+      '<span class="knlab">'+country.replace("United States","U.S.")+' &middot; '+last.year+'</span>'+
+      '<span class="knval">'+ind.fmt(last.v)+'</span>'+
+      '<span class="knrange">'+ind.fmt(last.lo)+' – '+ind.fmt(last.hi)+'</span>';
+    host.appendChild(row);
+  });
 }
 
 /* ============ tipping strip ============ */
@@ -218,6 +234,22 @@ function updateCards(){
   document.getElementById("card-ann").textContent=f(ann);
   document.getElementById("card-cum").textContent=f(cum);
   document.getElementById("card-rem").textContent=f(rem);
+  updateTransDetail();
+}
+
+/* live per-country 2050 emissions & carbon price under the selected scenario */
+function updateTransDetail(){
+  const host=document.getElementById("trans-detail");if(!host)return;host.innerHTML="";
+  const selName=SCEN[state.scenario].trans;
+  selectedCountries().forEach(country=>{
+    const d=transSeries(country,selName);const last=d.find(p=>p.year===2050)||d[d.length-1];if(!last)return;
+    const row=document.createElement("div");row.className="knrow";
+    row.innerHTML='<span class="kndot" style="background:'+COL[country]+'"></span>'+
+      '<span class="knlab">'+country.replace("United States","U.S.")+' &middot; 2050 ('+selName+')</span>'+
+      '<span class="knval">'+last.e.toLocaleString()+' Mt</span>'+
+      '<span class="knrange">$'+last.cp+'/t CO&#8322;</span>';
+    host.appendChild(row);
+  });
 }
 
 /* ============ shared layout / color ============ */
