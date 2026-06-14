@@ -42,7 +42,7 @@ const INDIC={
     fmt:v=>(v>0?"+":"")+v.toFixed(1)+" %",
     finding:"Precipitation responses are smaller, more mixed and more uncertain than temperature changes."},
   hot_days:{title:"Extremely hot days (> 35 °C)",ytitle:"Days above 35 °C per year",unit:"days",
-    desc:"Annual count of days above 35 °C (national average). Projected values only; no consistent observed record is available.",
+    desc:"Annual count of days above 35 °C (national average). History is from the CMIP6 historical run (model), consistent with the projections.",
     fmt:v=>Math.round(v)+" days",
     finding:"Extreme-heat exposure rises sharply under higher-emissions pathways."}
 };
@@ -224,7 +224,7 @@ function transSeries(country,scenName){
     .sort((a,b)=>a.year-b.year);
 }
 function updateTransitionChart(){
-  const traces=[];const selName=SCEN[state.scenario].trans;
+  const traces=[];const ann=[];const selName=SCEN[state.scenario].trans;
   const others=["Current Policies","Delayed Transition","Net Zero 2050"].filter(s=>s!==selName);
   selectedCountries().forEach(country=>{
     const col=COL[country];
@@ -239,11 +239,12 @@ function updateTransitionChart(){
       customdata:d.map(p=>[country,selName,p.inv,p.cp]),
       hovertemplate:"<b>%{customdata[0]}</b> · %{x}<br>%{customdata[1]}<br>Emissions: %{y:,} MtCO₂e<br>Investment: $%{customdata[2]}bn/yr<br>Carbon price: $%{customdata[3]}/t<extra></extra>"});
     const last=d[d.length-1];
-    if(last){traces.push({x:[last.year],y:[last.e],mode:"text",text:[" "+country.replace("United States","U.S.")],
-      textposition:"middle right",textfont:{color:col,size:12,family:FONT},showlegend:false,hoverinfo:"skip"});}
+    if(last){ann.push({x:last.year,y:last.e,xanchor:"left",yanchor:"middle",
+      text:" "+country.replace("United States","U.S."),showarrow:false,font:{color:col,size:12,family:FONT}});}
   });
   const layout=baseLayout();
-  layout.xaxis.range=[2020,2052];layout.xaxis.title={text:"Year",font:{size:12,family:FONT,color:SUB}};
+  layout.annotations=ann;
+  layout.xaxis.range=[2020,2050];layout.xaxis.title={text:"Year",font:{size:12,family:FONT,color:SUB}};
   layout.yaxis.title={text:"Annual emissions (MtCO₂e)",font:{size:12.5,family:FONT,color:SUB}};
   layout.yaxis.rangemode="tozero";
   layout.title={text:"<b>Emissions pathways: "+selName+"</b><br><span style='font-size:12px;color:#555'>Bold line = selected scenario; faint lines = other scenarios. China (red) vs United States (blue)</span>",
@@ -253,14 +254,34 @@ function updateTransitionChart(){
 }
 
 /* ============ abatement options + cards ============ */
+const ODESC={
+ "Renewable electricity expansion":"Scale up wind and solar to replace fossil power generation by 2050.",
+ "Coal phase-down":"Retire unabated coal-fired power (China toward ~5% of generation, U.S. to near zero) by 2050.",
+ "Electricity grid & storage":"Expand transmission and battery storage so high-renewable grids stay reliable.",
+ "Transport electrification":"Shift cars, trucks and buses from oil to electricity by 2050.",
+ "Building & industrial efficiency":"Efficiency upgrades, heat pumps and electrified industrial heat.",
+ "Methane abatement":"Cut methane leaks from coal mines, oil and gas, and waste."
+};
 function buildOpts(){
   const opts=[...new Set(ABATE.map(r=>r.option))];
   const host=document.getElementById("opts");host.innerHTML="";
+  const f=n=>Math.round(n).toLocaleString();
   opts.forEach(opt=>{
-    const row=ABATE.find(r=>r.option===opt);
+    const rows=ABATE.filter(r=>r.option===opt);
+    const chn=rows.find(r=>r.country==="China"),usa=rows.find(r=>r.country==="United States");
+    const totInv=rows.reduce((s,r)=>s+ +r.estimated_investment_usd_billion,0);
+    const sector=rows[0].sector;
+    const perCountry=[
+      chn?'China '+f(chn.estimated_annual_abatement_mtco2e)+' ('+chn.confidence+')':null,
+      usa?'U.S. '+f(usa.estimated_annual_abatement_mtco2e)+' ('+usa.confidence+')':null
+    ].filter(Boolean).join(" · ");
     const div=document.createElement("div");div.className="opt-row";
-    div.innerHTML='<label><input type="checkbox" data-opt="'+opt+'"><span><span class="o-name">'+opt+'</span>'+
-      '<div class="o-meta">'+row.sector+' · confidence: '+row.confidence+'</div></span></label>';
+    div.innerHTML='<label><input type="checkbox" data-opt="'+opt+'">'+
+      '<span><span class="o-name">'+opt+'</span>'+
+      '<div class="o-desc">'+(ODESC[opt]||"")+'</div>'+
+      '<div class="o-meta">'+sector+' · national annual abatement by ~2050: '+perCountry+' MtCO₂e/yr</div>'+
+      '<div class="o-meta">Investment ~$'+f(totInv)+' bn/yr (both countries)</div>'+
+      '</span></label>';
     host.appendChild(div);
     const cb=div.querySelector("input");
     cb.addEventListener("change",()=>{ if(cb.checked)abateSel.add(opt);else abateSel.delete(opt);
@@ -306,7 +327,7 @@ function updateAbateScenario(){
   if(gap<=0){
     intro="<b>Current Policies</b> implies little abatement beyond today's path, so few measures are required. More ambitious scenarios (Intermediate, Low) call for progressively more of the levers below.";
   }else{
-    intro="Reaching <b>"+selName+"</b> by 2050 means cutting about <b>"+f(gap)+"</b> MtCO₂e per year versus a Current-Policies path (selected countries). Your package delivers <b>"+f(ann)+"</b> MtCO₂e per year, about <b>"+pct+"%</b> of that cut.";
+    intro="Reaching <b>"+selName+"</b> by 2050 means cutting about <b>"+f(gap)+"</b> MtCO₂e per year versus a Current-Policies path (selected countries). Your package delivers <b>"+f(ann)+"</b> MtCO₂e per year, about <b>"+pct+"%</b> of that cut. The option estimates and the scenario pathways come from different sources and are not reconciled, and the levers overlap (renewables and coal phase-down cut some of the same tonnes), so even selecting every option need not reach 100%.";
   }
   const barColor=pct>=100?"#2A4D69":(pct>=50?"#E69F00":"#B23A2E");
   host.innerHTML=

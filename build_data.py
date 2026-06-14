@@ -22,6 +22,7 @@ PROJ_YEAR_MAP = {2020: 2030, 2040: 2050, 2060: 2070, 2080: 2090, 2100: 2100}
 SRC_MAP = {
     "CCKP-CMIP6": "World Bank CCKP (CMIP6 ensemble)",
     "CCKP-CMIP6-est": "World Bank CCKP (CMIP6 ensemble; end-century held)",
+    "CCKP-CMIP6-historical": "World Bank CCKP (CMIP6 historical run)",
     "CCKP-ERA5": "World Bank CCKP (ERA5 observed)",
 }
 
@@ -135,7 +136,15 @@ USA,2020,SSP5-8.5,hot_days,16.39,7.37,28.83,days,1981-2010,CCKP-CMIP6
 USA,2040,SSP5-8.5,hot_days,24.16,11.85,38.27,days,1981-2010,CCKP-CMIP6
 USA,2060,SSP5-8.5,hot_days,34.10,18.18,53.79,days,1981-2010,CCKP-CMIP6
 USA,2080,SSP5-8.5,hot_days,51.67,28.55,74.05,days,1981-2010,CCKP-CMIP6
-USA,2100,SSP5-8.5,hot_days,68.26,41.38,97.40,days,1981-2010,CCKP-CMIP6"""
+USA,2100,SSP5-8.5,hot_days,68.26,41.38,97.40,days,1981-2010,CCKP-CMIP6
+CHN,1980,historical,hot_days,3.09,1.43,5.74,days,1981-2010,CCKP-CMIP6-historical
+CHN,1990,historical,hot_days,3.63,1.96,6.19,days,1981-2010,CCKP-CMIP6-historical
+CHN,2000,historical,hot_days,4.48,2.38,7.30,days,1981-2010,CCKP-CMIP6-historical
+CHN,2010,historical,hot_days,4.96,2.69,8.16,days,1981-2010,CCKP-CMIP6-historical
+USA,1980,historical,hot_days,7.74,3.20,14.53,days,1981-2010,CCKP-CMIP6-historical
+USA,1990,historical,hot_days,9.08,4.43,14.88,days,1981-2010,CCKP-CMIP6-historical
+USA,2000,historical,hot_days,10.18,4.33,16.97,days,1981-2010,CCKP-CMIP6-historical
+USA,2010,historical,hot_days,12.35,5.60,19.91,days,1981-2010,CCKP-CMIP6-historical"""
 
 CC_MAP = {"CHN": "China", "USA": "United States"}
 phys_header = ["country","year","scenario","indicator","value","lower_bound","upper_bound","unit","baseline_period","source"]
