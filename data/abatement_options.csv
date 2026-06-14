@@ -1,0 +1,13 @@
+country,option,sector,estimated_investment_usd_billion,estimated_annual_abatement_mtco2e,cumulative_abatement_2050_mtco2e,confidence,source,notes
+China,Renewable electricity expansion,Power,250,2500,50000,High,IEA NZE 2023; IEA China roadmap 2021; IPCC WGIII,Annual investment; China share of global NZE wind+solar spend
+China,Coal phase-down,Power,50,3000,60000,High,IEA China carbon-neutrality roadmap 2021,Unabated coal ends by 2050; abatement vs ~11 Gt baseline
+China,Electricity grid & storage,Power,90,600,12000,Medium,IEA China roadmap 2021,Enabling investment; abatement is indirect
+China,Transport electrification,Transport,70,800,16000,Medium,IEA China roadmap 2021; IPCC WGIII,China ~40% of global EV sales
+China,Building & industrial efficiency,Industry & Buildings,80,1500,30000,Medium,IEA China roadmap 2021; IPCC WGIII,Industry is China's largest emitting sector
+China,Methane abatement,Cross-cutting,10,400,8000,Medium,IEA Global Methane Tracker 2024; China Methane Plan 2023,Coal-mine + oil & gas + agriculture; no binding target
+United States,Renewable electricity expansion,Power,130,1000,20000,High,IEA NZE 2023; IPCC WGIII; Rhodium,US share of global NZE wind+solar spend
+United States,Coal phase-down,Power,20,800,16000,High,Rhodium Pathways to Net-Zero; IEA NZE,Coal displaced by gas + renewables
+United States,Electricity grid & storage,Power,70,400,8000,Medium,IEA NZE 2023; Rhodium,Transmission + storage; abatement is indirect
+United States,Transport electrification,Transport,80,700,14000,Medium,IPCC WGIII; Rhodium; IEA,Transport is the largest US emitting sector
+United States,Building & industrial efficiency,Industry & Buildings,60,500,10000,Medium,IPCC WGIII; IEA NZE; Rhodium,Efficiency + heat pumps + electrification
+United States,Methane abatement,Cross-cutting,8,250,5000,High,IEA Global Methane Tracker 2024; Global Methane Pledge; EPA rules,"Oil & gas + landfill; low-cost, largely regulated"

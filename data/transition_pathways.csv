@@ -1,0 +1,43 @@
+country,year,scenario,emissions_mtco2e,investment_usd_billion,carbon_price_usd,source
+China,2020,Current Policies,11900,300,2,NGFS Phase V / IEA (energy CO2 base year)
+China,2025,Current Policies,12200,640,4,NGFS Phase V / IEA WEI 2025
+China,2030,Current Policies,12400,700,6,NGFS Phase V / IEA STEPS
+China,2035,Current Policies,12300,720,8,NGFS Phase V
+China,2040,Current Policies,12000,730,10,NGFS Phase V
+China,2045,Current Policies,11700,740,12,NGFS Phase V
+China,2050,Current Policies,11400,750,15,NGFS Phase V
+China,2020,Delayed Transition,11900,300,2,NGFS Phase V / IEA
+China,2025,Delayed Transition,12200,640,4,NGFS Phase V
+China,2030,Delayed Transition,12400,720,8,NGFS Phase V
+China,2035,Delayed Transition,9800,1100,180,NGFS Phase V
+China,2040,Delayed Transition,6800,1300,280,NGFS Phase V
+China,2045,Delayed Transition,3800,1300,360,NGFS Phase V
+China,2050,Delayed Transition,1500,1200,430,NGFS Phase V
+China,2020,Net Zero 2050,11900,300,2,NGFS Phase V / IEA
+China,2025,Net Zero 2050,11200,900,40,NGFS Phase V / IEA NZE
+China,2030,Net Zero 2050,8800,1500,110,NGFS Phase V / IEA NZE
+China,2035,Net Zero 2050,6000,1700,300,NGFS Phase V
+China,2040,Net Zero 2050,3600,1700,420,NGFS Phase V
+China,2045,Net Zero 2050,1700,1600,520,NGFS Phase V
+China,2050,Net Zero 2050,600,1500,620,NGFS Phase V
+United States,2020,Current Policies,4600,250,3,NGFS Phase V / US EIA (2020 energy CO2)
+United States,2025,Current Policies,4700,300,5,NGFS Phase V / IEA STEPS
+United States,2030,Current Policies,4600,330,7,NGFS Phase V
+United States,2035,Current Policies,4500,340,9,NGFS Phase V
+United States,2040,Current Policies,4400,350,11,NGFS Phase V
+United States,2045,Current Policies,4300,355,13,NGFS Phase V
+United States,2050,Current Policies,4200,360,16,NGFS Phase V
+United States,2020,Delayed Transition,4600,250,3,NGFS Phase V / US EIA
+United States,2025,Delayed Transition,4700,300,5,NGFS Phase V
+United States,2030,Delayed Transition,4500,330,8,NGFS Phase V
+United States,2035,Delayed Transition,3400,600,180,NGFS Phase V
+United States,2040,Delayed Transition,2200,650,280,NGFS Phase V
+United States,2045,Delayed Transition,1100,620,370,NGFS Phase V
+United States,2050,Delayed Transition,400,550,440,NGFS Phase V
+United States,2020,Net Zero 2050,4600,250,3,NGFS Phase V / US EIA
+United States,2025,Net Zero 2050,4100,500,45,NGFS Phase V / IEA NZE
+United States,2030,Net Zero 2050,2900,750,120,NGFS Phase V / IEA NZE
+United States,2035,Net Zero 2050,1900,800,300,NGFS Phase V
+United States,2040,Net Zero 2050,1100,800,430,NGFS Phase V
+United States,2045,Net Zero 2050,500,750,530,NGFS Phase V
+United States,2050,Net Zero 2050,100,700,640,NGFS Phase V

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>How climate futures could diverge in China and the United States</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+<div class="wrap">
+  <h1>How climate futures could diverge in China and the United States</h1>
+  <p class="subtitle">Compare projected physical conditions under alternative global pathways, then explore how transition choices change emissions and investment needs. This is a <b>scenario explorer</b>, not a forecast.</p>
+  <p class="instruction">Select countries, indicators and scenarios. Switch to <b>Transition choices</b> to build an abatement package.</p>
+
+  <div class="controls">
+    <div class="cgroup">
+      <span class="clabel">Countries</span>
+      <div class="checks">
+        <label class="chk china"><input type="checkbox" id="c-china" checked/> China</label>
+        <label class="chk us"><input type="checkbox" id="c-us" checked/> United States</label>
+      </div>
+    </div>
+    <div class="cgroup" id="indicator-group">
+      <span class="clabel">Indicator</span>
+      <div class="seg" id="seg-indicator">
+        <label><input type="radio" name="indicator" value="temp_anomaly" checked/><span class="opt">Temperature<small>°C anomaly</small></span></label>
+        <label><input type="radio" name="indicator" value="precip_change"/><span class="opt">Precipitation<small>% change</small></span></label>
+        <label><input type="radio" name="indicator" value="hot_days"/><span class="opt">Hot days<small>&gt;35 °C</small></span></label>
+      </div>
+    </div>
+    <div class="cgroup">
+      <span class="clabel">Scenario</span>
+      <div class="seg" id="seg-scenario">
+        <label><input type="radio" name="scenario" value="low"/><span class="opt">Low<small id="sc-low">SSP1-2.6</small></span></label>
+        <label><input type="radio" name="scenario" value="intermediate" checked/><span class="opt">Intermediate<small id="sc-int">SSP2-4.5</small></span></label>
+        <label><input type="radio" name="scenario" value="high"/><span class="opt">High<small id="sc-high">SSP5-8.5</small></span></label>
+      </div>
+    </div>
+    <div class="cgroup">
+      <span class="clabel">View</span>
+      <div class="tabs" role="tablist">
+        <button class="tab" id="tab-climate" role="tab" aria-selected="true">Climate outcomes</button>
+        <button class="tab" id="tab-transition" role="tab" aria-selected="false">Transition choices</button>
+      </div>
+    </div>
+    <div class="cgroup">
+      <span class="clabel">&nbsp;</span>
+      <button class="btn" id="reset">Reset view</button>
+    </div>
+    <div class="cgroup" id="time-group">
+      <span class="clabel">Time range <span id="time-readout" style="color:var(--ink);font-weight:600"></span></span>
+      <div style="display:flex;gap:10px;align-items:center;font-size:11px;color:var(--src)">
+        <span>From</span><input type="range" id="t-from" min="1980" max="2095" step="5" value="1990" aria-label="Start year"/>
+        <span>To</span><input type="range" id="t-to" min="1985" max="2100" step="5" value="2100" aria-label="End year"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIMATE VIEW -->
+  <section id="climate-view">
+    <div class="main-grid">
+      <div class="chart-card"><div id="climate-chart" class="chart"></div></div>
+      <div class="panel">
+        <h3 id="ind-title">Mean temperature anomaly</h3>
+        <p id="ind-desc"></p>
+        <div class="kv"><span>Scenario</span><b id="p-scen"></b></div>
+        <div class="kv"><span>Baseline</span><b>1981–2010</b></div>
+        <div class="kv"><span>History → projection</span><b>2020</b></div>
+        <p class="finding" id="ind-finding"></p>
+      </div>
+    </div>
+    <div class="strip-card">
+      <h3>Climate tipping-point risk increases with global warming</h3>
+      <p class="note">Estimated warming thresholds for selected tipping elements (bar = range, marker = central estimate). Thresholds are uncertain; risk generally rises with warming. Ranges from Armstrong McKay et al. 2022, Science.</p>
+      <div id="tip-chart" class="tip-chart"></div>
+    </div>
+  </section>
+
+  <!-- TRANSITION VIEW -->
+  <section id="transition-view" class="hidden">
+    <div class="main-grid">
+      <div class="chart-card"><div id="transition-chart" class="chart"></div></div>
+      <div>
+        <div class="cards">
+          <div class="card"><div class="lab">Annual investment</div><div class="val" id="card-inv">—</div><div class="un">US$ billion / year (selected options)</div></div>
+          <div class="card"><div class="lab">Annual emissions cut</div><div class="val" id="card-ann">—</div><div class="un">MtCO₂e / year</div></div>
+          <div class="card"><div class="lab">Cumulative abatement</div><div class="val" id="card-cum">—</div><div class="un">MtCO₂e through 2050</div></div>
+          <div class="card"><div class="lab">Remaining 2050 emissions</div><div class="val" id="card-rem">—</div><div class="un">MtCO₂e / year (illustrative)</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="abate">
+      <h3>Build an abatement package</h3>
+      <p class="note">Tick options to add their investment and abatement to the summary. Option effects are shown as an illustrative sum — interactions, overlaps and economy-wide feedback effects are not modelled, and these choices do not recalculate the physical-climate chart.</p>
+      <div class="opts" id="opts"></div>
+    </div>
+  </section>
+
+  <footer>
+    <h4>Methodology &amp; sources</h4>
+    <p><b>Scenario frameworks differ.</b> Physical-climate pathways use CMIP6 SSP scenarios (SSP1-2.6 / SSP2-4.5 / SSP5-8.5); transition pathways use NGFS narratives (Net Zero 2050 / Delayed Transition / Current Policies). The Low/Intermediate/High labels align them conceptually only — the names are <i>not</i> interchangeable across the two modelling frameworks.</p>
+    <p><b>Definitions.</b> Temperature anomaly and precipitation change are relative to the 1981–2010 baseline. "Extremely hot days" are days above 35 °C (national average). Uncertainty ribbons show the CMIP6 ensemble 10th–90th-percentile bounds. Physical outcomes are <i>not</i> recalculated from national investment choices, which would require an integrated climate model. Projection points are plotted at 20-year-window centres (2030, 2050, 2070, 2090).</p>
+    <p><b>Sources.</b> Physical climate: World Bank Climate Change Knowledge Portal (CMIP6 multi-model ensemble; ERA5 for observed history). Transition pathways: NGFS Phase V scenarios; base-year emissions and investment from IEA and US EIA. Abatement options: IEA Net Zero Roadmap and China carbon-neutrality roadmap, IPCC AR6 WGIII, Rhodium Group, IEA Global Methane Tracker. Tipping points: Armstrong McKay, D.I. et al. (2022), <i>Science</i> 377, eabn7950. Transition-pathway trajectories between published anchor points are interpolated consistent with NGFS scenario logic.</p>
+    <p>Built with Plotly.js. Data files: <code>data/physical_climate.csv</code>, <code>data/transition_pathways.csv</code>, <code>data/abatement_options.csv</code>, <code>data/tipping_points.csv</code>. Last updated: 2026-06-14.</p>
+  </footer>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

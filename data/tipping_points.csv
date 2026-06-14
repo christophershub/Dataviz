@@ -1,0 +1,7 @@
+tipping_element,lower_warming_level,central_warming_level,upper_warming_level,consequence,confidence,source
+Greenland Ice Sheet collapse,0.8,1.5,3.0,~7 m sea-level rise over millennia,High,"Armstrong McKay et al. 2022, Science"
+West Antarctic Ice Sheet collapse,1.0,1.5,3.0,~5 m sea-level rise over millennia,High,"Armstrong McKay et al. 2022, Science"
+Warm-water coral reef die-off,1.0,1.5,2.0,Near-total loss of low-latitude reefs,High,"Armstrong McKay et al. 2022, Science"
+Boreal permafrost abrupt thaw,1.0,1.5,2.3,Localized abrupt thaw and extra carbon release,Medium,"Armstrong McKay et al. 2022, Science"
+Labrador-Irminger Sea convection collapse,1.1,1.8,3.8,Regional cooling; European weather extremes,Medium,"Armstrong McKay et al. 2022, Science"
+Atlantic circulation (AMOC) collapse,1.4,4.0,8.0,Major shifts in regional climate and monsoons,Medium,"Armstrong McKay et al. 2022, Science"
